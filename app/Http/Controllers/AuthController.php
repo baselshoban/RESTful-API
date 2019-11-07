@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class AuthController extends Controller
+class AuthController extends ApiController
 {
     /**
      * Login to the application.
@@ -16,9 +16,9 @@ class AuthController extends Controller
         $credentials = request(['username', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return $this->ResponseUnauthorized();
         }
 
-        return response()->json(["token" => $token]);
+        return $this->ResponseWithSuccess(["token" => $token]);
     }
 }
