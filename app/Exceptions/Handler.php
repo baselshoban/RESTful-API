@@ -4,9 +4,16 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\CssSelector\Exception\InternalErrorException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Http\Traits\ApiResponses;
 
 class Handler extends ExceptionHandler
 {
+    use ApiResponses;
     /**
      * A list of the exception types that are not reported.
      *
@@ -48,6 +55,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ( $exception instanceof ModelNotFoundException || $exception instanceof NotFoundHttpException) {
+            return $this->ResponseWithError('The requested resource could not be found!');
+        }
+
+        if ( $exception instanceof MethodNotAllowedHttpException) {
+            return $this->ResponseWithError('The used HTTP method is not allowed for the requested path.');
+        }
         return parent::render($request, $exception);
     }
 }
