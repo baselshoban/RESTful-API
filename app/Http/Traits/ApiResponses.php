@@ -20,4 +20,12 @@ trait ApiResponses
 			'message' => 'Unauthorized'
 		], 401);
 	}
+
+	public function ResponseWithError($error)
+	{
+		return response()->json([
+			'success' => false,
+			'message' => $error
+		], 400);
+	}
 }

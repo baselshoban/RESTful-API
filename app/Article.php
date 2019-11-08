@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Category;
 
 class Article extends Model
 {
@@ -11,4 +12,10 @@ class Article extends Model
     	'title',
     	'content'
     ];
+
+    public function categories()
+    {
+    	return $this->belongsToMany(Category::class)
+    		->select('id', 'name');
+    }
 }

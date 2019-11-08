@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Article;
+use DB;
+use App\{Article,Category};
 use Illuminate\Http\Request;
 
 class ArticleController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index', 'show']);
+    }
+    
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +20,7 @@ class ArticleController extends ApiController
      */
     public function index()
     {
-        return $this->ResponseWithSuccess(Article::all());
+        return $this->ResponseWithSuccess(Article::with('categories')->get());
     }
 
     /**
@@ -25,9 +31,21 @@ class ArticleController extends ApiController
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         $article = Article::create(request(['title', 'content']));
+        foreach ($request->categories as $categoryId) {
+            $category = Category::find($categoryId);
+            if (! empty($category))
+                $article->categories()->attach($categoryId);
+            else
+            {
+                DB::rollBack();
+                return $this->ResponseWithError("There is no category with id: " . $categoryId);
+            }
+        }
+        DB::commit();
 
-        return $this->ResponseWithSuccess($article);
+        return $this->ResponseWithSuccess($article->load('categories'));
     }
 
     /**
@@ -38,7 +56,7 @@ class ArticleController extends ApiController
      */
     public function show(Article $article)
     {
-        return $this->ResponseWithSuccess($article);
+        return $this->ResponseWithSuccess($article->load('categories'));
     }
 
     /**
@@ -50,11 +68,31 @@ class ArticleController extends ApiController
      */
     public function update(Request $request, Article $article)
     {
-        $article->title = $request->title;
-        $article->content = $request->content;
-        $article->save();
+        DB::beginTransaction();
+        $params = $request->only(['title', 'content']);
 
-        return $this->ResponseWithSuccess($article);
+        foreach ($params as $param => $value) {
+            $article->{$param} = $value;
+        }
+
+        if ($request->has('categories'))
+        {
+            $article->categories()->detach();
+
+            foreach ($request->categories as $categoryId) {
+                $category = Category::find($categoryId);
+                if (! empty($category))
+                    $article->categories()->attach($categoryId);
+                else
+                {
+                    DB::rollBack();
+                    return $this->ResponseWithError("There is no category with id: " . $categoryId);
+                }
+            }
+        }
+        DB::commit();
+
+        return $this->ResponseWithSuccess($article->load('categories'));
     }
 
     /**
@@ -65,6 +103,8 @@ class ArticleController extends ApiController
      */
     public function destroy(Article $article)
     {
+        $article->load('categories');
+        $article->categories()->detach();
         $article->delete();
 
         return $this->ResponseWithSuccess($article);
