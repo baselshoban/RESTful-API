@@ -25,6 +25,9 @@ class CategoryController extends ApiController
      */
     public function store(Request $request)
     {
+        $request->validate([
+                'name' => 'required|max:255',
+            ]);
         $category = Category::create(request(['name']));
 
         return $this->ResponseWithSuccess($category);
@@ -50,8 +53,14 @@ class CategoryController extends ApiController
      */
     public function update(Request $request, Category $category)
     {
-        $category->name = $request->name;
-        $category->save();
+        $request->validate([
+                'name' => 'nullable|max:255',
+            ]);
+        
+        if ($request->has('name')) {
+            $category->name = $request->name;
+            $category->save();
+        }
 
         return $this->ResponseWithSuccess($category);
     }
