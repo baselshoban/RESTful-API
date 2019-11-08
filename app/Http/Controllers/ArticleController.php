@@ -31,18 +31,20 @@ class ArticleController extends ApiController
      */
     public function store(Request $request)
     {
+        // Validate
+        $request->validate([
+                'title' => 'required|max:255',
+                'content' => 'required',
+                'categories' => 'required|array',
+                'categories.*' => 'exists:categories,id'
+            ]);
+
         DB::beginTransaction();
+
+        // Create article with it's associated categories
         $article = Article::create(request(['title', 'content']));
-        foreach ($request->categories as $categoryId) {
-            $category = Category::find($categoryId);
-            if (! empty($category))
-                $article->categories()->attach($categoryId);
-            else
-            {
-                DB::rollBack();
-                return $this->ResponseWithError("There is no category with id: " . $categoryId);
-            }
-        }
+        $article->categories()->attach($request->categories);
+
         DB::commit();
 
         return $this->ResponseWithSuccess($article->load('categories'));
@@ -68,28 +70,29 @@ class ArticleController extends ApiController
      */
     public function update(Request $request, Article $article)
     {
-        DB::beginTransaction();
-        $params = $request->only(['title', 'content']);
+        // Validate
+        $request->validate([
+                'title' => 'max:255',
+                'categories' => 'array',
+                'categories.*' => 'exists:categories,id'
+            ]);
 
+        DB::beginTransaction();
+
+        // Update parameters
+        $params = $request->only(['title', 'content']);
         foreach ($params as $param => $value) {
             $article->{$param} = $value;
         }
+        $article->save();
 
+        // Update associated categories
         if ($request->has('categories'))
         {
             $article->categories()->detach();
-
-            foreach ($request->categories as $categoryId) {
-                $category = Category::find($categoryId);
-                if (! empty($category))
-                    $article->categories()->attach($categoryId);
-                else
-                {
-                    DB::rollBack();
-                    return $this->ResponseWithError("There is no category with id: " . $categoryId);
-                }
-            }
+            $article->categories()->attach($request->categories);
         }
+
         DB::commit();
 
         return $this->ResponseWithSuccess($article->load('categories'));
