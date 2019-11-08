@@ -10,4 +10,14 @@ class Category extends Model
     	'id',
     	'name'
     ];
+
+    public function articles()
+    {
+    	return $this->belongsToMany(Article::class);
+    }
+
+    public function hasAnyArticles()
+    {
+    	return $this->articles()->count() > 0;
+    }
 }

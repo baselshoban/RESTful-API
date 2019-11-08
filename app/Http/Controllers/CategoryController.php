@@ -64,6 +64,8 @@ class CategoryController extends ApiController
      */
     public function destroy(Category $category)
     {
+        if ( $category->hasAnyArticles() )
+            return $this->ResponseWithError($category->name . " category still have articles associated with it. You can't delete it.");
         $category->delete();
 
         return $this->ResponseWithSuccess($category);
