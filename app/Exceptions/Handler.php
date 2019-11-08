@@ -56,12 +56,17 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         if ( $exception instanceof ModelNotFoundException || $exception instanceof NotFoundHttpException) {
-            return $this->ResponseWithError('The requested resource could not be found!');
+            return $this->ResponseNotFound();
         }
 
         if ( $exception instanceof MethodNotAllowedHttpException) {
-            return $this->ResponseWithError('The used HTTP method is not allowed for the requested path.');
+            return $this->ResponseMethodNotAllowed();
         }
+        
+        if( $exception instanceof InternalErrorException && env('APP_ENV') == 'production' ){
+            return $this->ResponseInternalError();
+        }
+
         return parent::render($request, $exception);
     }
 }

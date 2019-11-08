@@ -2,6 +2,8 @@
 
 namespace App\Http\Traits;
 
+use Symfony\Component\HttpFoundation\Response;
+
 trait ApiResponses 
 {
 
@@ -9,24 +11,54 @@ trait ApiResponses
 	{
 		return response()->json([
 			'success' => true,
+			'status' => Response::HTTP_OK,
 			'data' => $payload
-		], 200);
+		], Response::HTTP_OK);
 	}
 
 	public function ResponseUnauthorized()
 	{
 		return response()->json([
 			'success' => false,
+			'status' => Response::HTTP_UNAUTHORIZED,
 			'message' => 'Unauthorized'
-		], 401);
+		], Response::HTTP_UNAUTHORIZED);
 	}
 
 	public function ResponseWithError($error)
 	{
 		return response()->json([
 			'success' => false,
-			'message' => $error
-		], 400);
+			'status' => Response::HTTP_BAD_REQUEST,
+			'message' => $error,
+		], Response::HTTP_BAD_REQUEST);
+	}
+
+	public function ResponseMethodNotAllowed()
+	{
+		return response()->json([
+			'success' => false,
+			'status' => Response::HTTP_METHOD_NOT_ALLOWED,
+			'message' => 'The used HTTP method is not allowed for the requested path.',
+		], Response::HTTP_METHOD_NOT_ALLOWED);
+	}
+
+	public function ResponseNotFound()
+	{
+		return response()->json([
+			'success' => false,
+			'status' => Response::HTTP_NOT_FOUND,
+			'message' => 'The requested resource could not be found!',
+		], Response::HTTP_NOT_FOUND);
+	}
+
+	public function ResponseInternalError()
+	{
+		return response()->json([
+			'success' => false,
+			'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+			'message' => 'Internal server error occurred. Please contact with us.',
+		], Response::HTTP_INTERNAL_SERVER_ERROR);
 	}
 
 	public function paginate($dataCollection)
