@@ -28,4 +28,24 @@ trait ApiResponses
 			'message' => $error
 		], 400);
 	}
+
+	public function paginate($dataCollection)
+	{
+		$limit = 10;
+		if ( request()->limit && request()->limit <= 100)
+			$limit = request()->limit;
+
+		$pagination = $dataCollection
+			->paginate($limit);
+
+		return [
+			"records" => $pagination->items(),
+			"pagination" => [
+				"current_page" => $pagination->currentPage(),
+				"total_pages" => ceil($pagination->total() / $pagination->perPage()),
+				"total_count" => $pagination->count(),
+				"limit" => $pagination->perPage(),
+			]
+		];
+	}
 }

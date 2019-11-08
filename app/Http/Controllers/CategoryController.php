@@ -19,7 +19,8 @@ class CategoryController extends ApiController
      */
     public function index()
     {
-        return $this->ResponseWithSuccess(Category::all());
+        $data = $this->paginate(Category::query());
+        return $this->ResponseWithSuccess($data);
     }
 
     /**
@@ -79,7 +80,9 @@ class CategoryController extends ApiController
     public function destroy(Category $category)
     {
         if ( $category->hasAnyArticles() )
-            return $this->ResponseWithError($category->name . " category still have articles associated with it. You can't delete it.");
+            return $this->ResponseWithError(
+                $category->name . " category still have articles associated with it. You can't delete it."
+            );
         $category->delete();
 
         return $this->ResponseWithSuccess($category);

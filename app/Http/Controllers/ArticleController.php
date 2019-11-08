@@ -20,7 +20,8 @@ class ArticleController extends ApiController
      */
     public function index()
     {
-        return $this->ResponseWithSuccess(Article::with('categories')->get());
+        $data = $this->paginate(Article::with('categories'));
+        return $this->ResponseWithSuccess($data);
     }
 
     /**
