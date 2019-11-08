@@ -34,7 +34,7 @@ class ArticleController extends ApiController
     {
         // Validate
         $request->validate([
-                'title' => 'required|max:255',
+                'title' => 'required|max:200',
                 'content' => 'required',
                 'categories' => 'required|array',
                 'categories.*' => 'distinct|exists:categories,id'
@@ -73,7 +73,7 @@ class ArticleController extends ApiController
     {
         // Validate
         $request->validate([
-                'title' => 'max:255',
+                'title' => 'max:200',
                 'categories' => 'array|min:1',
                 'categories.*' => 'distinct|exists:categories,id'
             ]);
