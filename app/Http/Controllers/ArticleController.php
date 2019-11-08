@@ -37,7 +37,7 @@ class ArticleController extends ApiController
                 'title' => 'required|max:255',
                 'content' => 'required',
                 'categories' => 'required|array',
-                'categories.*' => 'exists:categories,id'
+                'categories.*' => 'distinct|exists:categories,id'
             ]);
 
         DB::beginTransaction();
@@ -74,8 +74,8 @@ class ArticleController extends ApiController
         // Validate
         $request->validate([
                 'title' => 'max:255',
-                'categories' => 'array',
-                'categories.*' => 'exists:categories,id'
+                'categories' => 'array|min:1',
+                'categories.*' => 'distinct|exists:categories,id'
             ]);
 
         DB::beginTransaction();
